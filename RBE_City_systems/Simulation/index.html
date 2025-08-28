@@ -1,1 +1,225 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RBE City Simulation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h1 class="text-3xl font-bold mb-4">Core Computer</h1>
+            <div id="core-computer-info">
+                <!-- Core Computer status and info will be displayed here -->
+                <p>System Status: <span id="system-status">Initializing...</span></p>
+                <p>System Time: <span id="system-time">--:--</span></p>
+            </div>
+            <div class="divider"></div>
+            <h2 class="text-xl font-bold mt-4 mb-2">System Modules</h2>
+            <ul id="system-modules" class="list-disc pl-5">
+                <!-- System modules (e.g., Food, Health, etc.) will be dynamically added here -->
+            </ul>
+        </div>
+        <div class="main-content">
+            <h1 class="text-3xl font-bold mb-4">RBE City Simulation</h1>
+            <div id="simulation-view">
+                <!-- The simulation visualization will go here -->
+                <p class="text-center text-gray-500 mt-20">Simulation view coming soon...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</body>
+</html>
+```{css}
+/* style.css */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #1a202c;
+    color: #e2e8f0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    display: flex;
+    width: 95vw;
+    height: 95vh;
+    background-color: #2d3748;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.sidebar {
+    width: 300px;
+    background-color: #1a202c;
+    padding: 2rem;
+    border-right: 2px solid #4a5568;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+#simulation-view {
+    flex-grow: 1;
+    background-color: #1a202c;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.divider {
+    height: 2px;
+    background-color: #4a5568;
+    margin: 1.5rem 0;
+}
+
+h1, h2, h3 {
+    color: #cbd5e0;
+}
+
+p {
+    margin-bottom: 0.5rem;
+}
+
+#system-modules li {
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: 200px;
+        border-right: none;
+        border-bottom: 2px solid #4a5568;
+        padding: 1rem;
+    }
+
+    .main-content {
+        padding: 1rem;
+    }
+}
+```{javascript}
+// script.js
+
+// A simple module to represent the Core Computer
+const CoreComputer = {
+    // Current state of the system
+    status: 'Booting up...',
+    systemTime: new Date(),
+    
+    // A log of messages and events
+    eventLog: [],
+
+    // A list of all connected system modules
+    modules: {
+        'Food Production': { status: 'Offline', icon: '🌱' },
+        'Waste Management': { status: 'Offline', icon: '♻️' },
+        'Healthcare': { status: 'Offline', icon: '🏥' },
+        'Transportation': { status: 'Offline', icon: '🚗' },
+        'Labs & Workshops': { status: 'Offline', icon: '🔬' },
+        'Education': { status: 'Offline', icon: '📚' }
+    },
+
+    // Initialize the Core Computer system
+    initialize() {
+        console.log('Core Computer: Initializing systems...');
+        this.updateStatus('Initializing system modules...');
+        this.updateTime();
+        this.renderModules();
+        this.simulateModuleStatus();
+    },
+
+    // Update the system status on the UI
+    updateStatus(newStatus) {
+        this.status = newStatus;
+        document.getElementById('system-status').textContent = newStatus;
+        this.logEvent(`Status updated: ${newStatus}`);
+    },
+
+    // Update the system time every second
+    updateTime() {
+        setInterval(() => {
+            this.systemTime = new Date();
+            const timeString = this.systemTime.toLocaleTimeString();
+            document.getElementById('system-time').textContent = timeString;
+        }, 1000);
+    },
+
+    // Log an event to the console (and eventually, to a history UI)
+    logEvent(message) {
+        this.eventLog.push({ timestamp: new Date(), message: message });
+        console.log(`[${this.systemTime.toLocaleTimeString()}] ${message}`);
+    },
+
+    // Render the system modules on the sidebar
+    renderModules() {
+        const moduleList = document.getElementById('system-modules');
+        moduleList.innerHTML = '';
+        for (const module in this.modules) {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `<span class="font-bold">${this.modules[module].icon} ${module}:</span> <span id="${module.replace(/\s/g, '-')}-status">${this.modules[module].status}</span>`;
+            moduleList.appendChild(listItem);
+        }
+    },
+    
+    // Simulate the gradual boot-up of each module
+    simulateModuleStatus() {
+        let delay = 1000;
+        for (const module in this.modules) {
+            setTimeout(() => {
+                this.modules[module].status = 'Online';
+                document.getElementById(`${module.replace(/\s/g, '-')}-status`).textContent = 'Online';
+                document.getElementById(`${module.replace(/\s/g, '-')}-status`).style.color = '#38a169'; // Green color
+                this.logEvent(`${module} module is now online.`);
+            }, delay);
+            delay += 1500;
+        }
+        setTimeout(() => {
+            this.updateStatus('All systems operational.');
+        }, delay + 500);
+    },
+
+    // The main game loop for the simulation
+    gameLoop() {
+        // This is where the core logic for the simulation will go
+        // e.g., update the state of the city, run health checks, etc.
+        // For now, it's just a placeholder
+    }
+};
+
+// Start the simulation when the page loads
+window.onload = function() {
+    CoreComputer.initialize();
+    
+    // Start the game loop
+    setInterval(CoreComputer.gameLoop, 1000); // Runs every second
+};
+
 
