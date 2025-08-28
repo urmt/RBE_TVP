@@ -135,6 +135,7 @@ function init3D() {
     createFoodSystem();
     createTransportationSystem();
     createLabsWorkshopsSystem();
+    createWasteManagementSystem();
 
     // Add lighting to the scene
     const ambientLight = new THREE.AmbientLight(0x404040, 2);
@@ -300,6 +301,57 @@ function createLabsWorkshopsSystem() {
 
     // Add the entire group to the scene
     scene.add(labsGroup);
+}
+
+// Function to create the Waste Management system
+function createWasteManagementSystem() {
+    // Place the waste management system in the third sector (i=2)
+    const sectorRadius = 10;
+    const angle = 2 * Math.PI / 3;
+    const x = Math.cos(angle) * (sectorRadius * 2);
+    const z = Math.sin(angle) * (sectorRadius * 2);
+
+    // Create a group to hold the waste management objects
+    const wasteGroup = new THREE.Group();
+    wasteGroup.position.set(x, 0, z);
+
+    // Central incinerator/processing tower
+    const towerGeometry = new THREE.CylinderGeometry(3, 5, 12, 32);
+    const towerMaterial = new THREE.MeshPhongMaterial({ color: 0x757575 }); // Gray
+    const tower = new THREE.Mesh(towerGeometry, towerMaterial);
+    tower.position.y = 6;
+    wasteGroup.add(tower);
+
+    // Recycling and composting facilities (represented as smaller boxes)
+    const facilityColor = 0x9e9e9e; // Lighter gray
+    const facilityGeometry = new THREE.BoxGeometry(3, 4, 3);
+    const facilityPositions = [
+        { x: -7, z: -4 },
+        { x: 7, z: -4 },
+        { x: 0, z: 7 }
+    ];
+
+    facilityPositions.forEach(pos => {
+        const facility = new THREE.Mesh(facilityGeometry, new THREE.MeshPhongMaterial({ color: facilityColor }));
+        facility.position.set(pos.x, 2, pos.z);
+        wasteGroup.add(facility);
+    });
+    
+    // Add pipes/conveyors (simplified as cylinders)
+    const pipeColor = 0x424242; // Dark gray
+    const pipeGeometry = new THREE.CylinderGeometry(0.5, 0.5, 10, 32);
+    const pipe1 = new THREE.Mesh(pipeGeometry, new THREE.MeshPhongMaterial({ color: pipeColor }));
+    pipe1.position.set(-3.5, 2, -2);
+    pipe1.rotation.z = Math.PI / 2;
+    wasteGroup.add(pipe1);
+
+    const pipe2 = new THREE.Mesh(pipeGeometry, new THREE.MeshPhongMaterial({ color: pipeColor }));
+    pipe2.position.set(3.5, 2, -2);
+    pipe2.rotation.z = Math.PI / 2;
+    wasteGroup.add(pipe2);
+
+    // Add the entire group to the scene
+    scene.add(wasteGroup);
 }
 
 // Function to handle window resizing
