@@ -40,3 +40,5 @@ Biologically resilient and less susceptible to simple failures.
 Produces both plant and animal protein.
 
 Minimal waste, with nutrients continuously recycled.
+
+<img width="3800" height="2500" alt="image" src="https://github.com/user-attachments/assets/dd730ff9-ac91-4936-ae2d-652ba1849513" />
