@@ -137,6 +137,7 @@ function init3D() {
     createLabsWorkshopsSystem();
     createWasteManagementSystem();
     createHealthcareSystem();
+    createEducationSystem();
 
     // Add lighting to the scene
     const ambientLight = new THREE.AmbientLight(0x404040, 2);
@@ -391,6 +392,45 @@ function createHealthcareSystem() {
     
     // Add the entire group to the scene
     scene.add(healthcareGroup);
+}
+
+// Function to create the Education system
+function createEducationSystem() {
+    // Place the education system in the fifth sector (i=4)
+    const sectorRadius = 10;
+    const angle = 4 * Math.PI / 3;
+    const x = Math.cos(angle) * (sectorRadius * 2);
+    const z = Math.sin(angle) * (sectorRadius * 2);
+
+    // Create a group to hold the education objects
+    const educationGroup = new THREE.Group();
+    educationGroup.position.set(x, 0, z);
+
+    // Central domed auditorium
+    const auditoriumGeometry = new THREE.SphereGeometry(6, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
+    const auditoriumMaterial = new THREE.MeshPhongMaterial({ color: 0x90caf9, transparent: true, opacity: 0.9 }); // Light blue
+    const auditorium = new THREE.Mesh(auditoriumGeometry, auditoriumMaterial);
+    auditorium.position.y = 3;
+    educationGroup.add(auditorium);
+
+    // Surrounding interconnected buildings (classrooms/libraries)
+    const buildingColor = 0xb3e5fc; // Lighter blue
+    const buildingGeometry = new THREE.BoxGeometry(5, 4, 5);
+    const buildingPositions = [
+        { x: -8, z: 0 },
+        { x: 8, z: 0 },
+        { x: 0, z: -8 },
+        { x: 0, z: 8 }
+    ];
+
+    buildingPositions.forEach(pos => {
+        const building = new THREE.Mesh(buildingGeometry, new THREE.MeshPhongMaterial({ color: buildingColor }));
+        building.position.set(pos.x, 2, pos.z);
+        educationGroup.add(building);
+    });
+
+    // Add the entire group to the scene
+    scene.add(educationGroup);
 }
 
 // Function to handle window resizing
