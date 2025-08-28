@@ -2,8 +2,9 @@
 // This script contains the core logic for the RBE City Simulation.
 // It initializes the Core Computer dashboard and a 3D simulation scene.
 
-// Import the three.js library for 3D graphics
+// Import the three.js and OrbitControls libraries for 3D graphics and camera control
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js';
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/controls/OrbitControls.js';
 
 // A simple module to represent the Core Computer
 const CoreComputer = {
@@ -96,7 +97,7 @@ const CoreComputer = {
 };
 
 // --- 3D Simulation using Three.js ---
-let scene, camera, renderer, cityGrid, rotatingObject;
+let scene, camera, renderer, controls, cityGrid;
 
 // Function to set up the 3D scene
 function init3D() {
@@ -106,56 +107,102 @@ function init3D() {
 
     // Camera setup
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 15;
-    camera.position.y = 5;
+    camera.position.z = 25;
+    camera.position.y = 15;
+    camera.lookAt(0, 0, 0);
 
     // Renderer setup
     renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth * 0.65, window.innerHeight * 0.95);
+    // Adjust renderer size to fit the container
     const simulationView = document.getElementById('simulation-view');
+    renderer.setSize(simulationView.clientWidth, simulationView.clientHeight);
     simulationView.innerHTML = ''; // Clear the "coming soon" text
     simulationView.appendChild(renderer.domElement);
     
+    // Add OrbitControls for user interaction
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true; // smooth camera movement
+    controls.dampingFactor = 0.05;
+
     // Handle window resize
     window.addEventListener('resize', onWindowResize, false);
     
-    // Create a rotating object
-    const geometry = new THREE.BoxGeometry(3, 3, 3);
-    const material = new THREE.MeshNormalMaterial();
-    rotatingObject = new THREE.Mesh(geometry, material);
-    scene.add(rotatingObject);
+    // Create the city grid
+    createCityGrid();
 
-    // Create a grid to represent the city's ground plane
-    const gridHelper = new THREE.GridHelper(50, 50, 0x4a5568, 0x4a5568);
-    scene.add(gridHelper);
-
-    // Add some light
-    const ambientLight = new THREE.AmbientLight(0x404040, 5); // soft white light
+    // Add lighting to the scene
+    const ambientLight = new THREE.AmbientLight(0x404040, 2);
     scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 10, 7.5);
+    scene.add(directionalLight);
 
     // Start the animation loop
     animate();
+}
+
+// Function to create a hexagonal city sector
+function createHexagonSector(radius, height, color, position) {
+    const geometry = new THREE.CylinderGeometry(radius, radius, height, 6);
+    const material = new THREE.MeshPhongMaterial({ color: color, flatShading: true });
+    const hexagon = new THREE.Mesh(geometry, material);
+    hexagon.position.set(position.x, position.y, position.z);
+    return hexagon;
+}
+
+// Function to create the central city hub and surrounding sectors
+function createCityGrid() {
+    // Sector dimensions and colors
+    const sectorRadius = 10;
+    const sectorHeight = 2;
+    const centralHubColor = 0x64b5f6; // Light blue
+    const sectorColor = 0x42a5f5; // Medium blue
+    const connectorColor = 0x2196f3; // Darker blue
+
+    // Create the central hub
+    const centralHub = createHexagonSector(sectorRadius, sectorHeight * 2, centralHubColor, { x: 0, y: 0, z: 0 });
+    scene.add(centralHub);
+
+    // Create the 6 surrounding sectors in a honeycomb pattern
+    const angleOffset = Math.PI / 6; // To align hexes properly
+    for (let i = 0; i < 6; i++) {
+        const angle = i * Math.PI / 3;
+        const x = Math.cos(angle) * (sectorRadius * 2);
+        const z = Math.sin(angle) * (sectorRadius * 2);
+        const sector = createHexagonSector(sectorRadius * 0.9, sectorHeight, sectorColor, { x, y: 0, z });
+        scene.add(sector);
+
+        // Add connecting roads/pathways (simple cylinders for now)
+        const connector = new THREE.Mesh(
+            new THREE.CylinderGeometry(1.5, 1.5, sectorRadius, 32),
+            new THREE.MeshPhongMaterial({ color: connectorColor })
+        );
+        connector.rotation.z = Math.PI / 2;
+        connector.position.set(x * 0.5, 0, z * 0.5);
+        scene.add(connector);
+    }
 }
 
 // Function to handle window resizing
 function onWindowResize() {
     // Update the renderer size based on the new container size
     const simulationView = document.getElementById('simulation-view');
-    camera.aspect = simulationView.clientWidth / simulationView.clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(simulationView.clientWidth, simulationView.clientHeight);
+    if (simulationView) {
+        camera.aspect = simulationView.clientWidth / simulationView.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(simulationView.clientWidth, simulationView.clientHeight);
+    }
 }
 
 // The main animation loop
 function animate() {
     requestAnimationFrame(animate);
 
-    // Rotate the object
-    if (rotatingObject) {
-        rotatingObject.rotation.x += 0.005;
-        rotatingObject.rotation.y += 0.005;
+    // Update OrbitControls
+    if (controls) {
+        controls.update();
     }
-
+    
     renderer.render(scene, camera);
 }
 
