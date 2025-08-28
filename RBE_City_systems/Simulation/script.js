@@ -130,6 +130,9 @@ function init3D() {
     // Create the city grid
     createCityGrid();
 
+    // Add specific system models
+    createFoodSystem();
+
     // Add lighting to the scene
     const ambientLight = new THREE.AmbientLight(0x404040, 2);
     scene.add(ambientLight);
@@ -170,6 +173,7 @@ function createCityGrid() {
         const x = Math.cos(angle) * (sectorRadius * 2);
         const z = Math.sin(angle) * (sectorRadius * 2);
         const sector = createHexagonSector(sectorRadius * 0.9, sectorHeight, sectorColor, { x, y: 0, z });
+        sector.userData.id = `sector_${i}`;
         scene.add(sector);
 
         // Add connecting roads/pathways (simple cylinders for now)
@@ -181,6 +185,56 @@ function createCityGrid() {
         connector.position.set(x * 0.5, 0, z * 0.5);
         scene.add(connector);
     }
+}
+
+// Function to create the Food Production system
+function createFoodSystem() {
+    // Place the food system in the first sector (i=0)
+    const sectorRadius = 10;
+    const x = Math.cos(0 * Math.PI / 3) * (sectorRadius * 2);
+    const z = Math.sin(0 * Math.PI / 3) * (sectorRadius * 2);
+
+    // Create a group to hold the food system objects
+    const foodSystemGroup = new THREE.Group();
+    foodSystemGroup.position.set(x, 0, z);
+
+    // Create main vertical hydroponic towers
+    const towerColor = 0x4caf50; // Green color
+    const towerHeight = 15;
+    const towerRadius = 1;
+    const towerCount = 6;
+    const towerDistance = 5;
+
+    for (let i = 0; i < towerCount; i++) {
+        const angle = i * Math.PI / (towerCount / 2);
+        const towerX = Math.cos(angle) * towerDistance;
+        const towerZ = Math.sin(angle) * towerDistance;
+
+        const towerGeometry = new THREE.CylinderGeometry(towerRadius, towerRadius, towerHeight, 32);
+        const towerMaterial = new THREE.MeshPhongMaterial({ color: towerColor });
+        const tower = new THREE.Mesh(towerGeometry, towerMaterial);
+        tower.position.set(towerX, towerHeight / 2, towerZ);
+        foodSystemGroup.add(tower);
+
+        // Add small growing pods on the tower (simplified)
+        const podGeometry = new THREE.BoxGeometry(1.5, 0.5, 1.5);
+        const podMaterial = new THREE.MeshPhongMaterial({ color: 0x81c784 }); // Lighter green
+        for (let j = 0; j < 5; j++) {
+            const pod = new THREE.Mesh(podGeometry, podMaterial);
+            pod.position.set(towerX, (j * 2) + 2, towerZ);
+            foodSystemGroup.add(pod);
+        }
+    }
+
+    // Add a central aquaponics reservoir
+    const reservoirGeometry = new THREE.CylinderGeometry(4, 4, 1.5, 32);
+    const reservoirMaterial = new THREE.MeshPhongMaterial({ color: 0x4fc3f7, transparent: true, opacity: 0.7 }); // Water-like color
+    const reservoir = new THREE.Mesh(reservoirGeometry, reservoirMaterial);
+    reservoir.position.set(0, 0.75, 0);
+    foodSystemGroup.add(reservoir);
+
+    // Add the entire group to the scene
+    scene.add(foodSystemGroup);
 }
 
 // Function to handle window resizing
