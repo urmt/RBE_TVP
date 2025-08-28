@@ -136,6 +136,7 @@ function init3D() {
     createTransportationSystem();
     createLabsWorkshopsSystem();
     createWasteManagementSystem();
+    createHealthcareSystem();
 
     // Add lighting to the scene
     const ambientLight = new THREE.AmbientLight(0x404040, 2);
@@ -352,6 +353,44 @@ function createWasteManagementSystem() {
 
     // Add the entire group to the scene
     scene.add(wasteGroup);
+}
+
+// Function to create the Healthcare system
+function createHealthcareSystem() {
+    // Place the healthcare system in the fourth sector (i=3)
+    const sectorRadius = 10;
+    const angle = 3 * Math.PI / 3;
+    const x = Math.cos(angle) * (sectorRadius * 2);
+    const z = Math.sin(angle) * (sectorRadius * 2);
+
+    // Create a group to hold the healthcare objects
+    const healthcareGroup = new THREE.Group();
+    healthcareGroup.position.set(x, 0, z);
+
+    // Central hub/tower
+    const centralHubGeometry = new THREE.CylinderGeometry(5, 5, 8, 32);
+    const centralHubMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff }); // White
+    const centralHub = new THREE.Mesh(centralHubGeometry, centralHubMaterial);
+    centralHub.position.y = 4;
+    healthcareGroup.add(centralHub);
+
+    // Radiating wings
+    const wingColor = 0xeeeeee; // Light gray
+    const wingGeometry = new THREE.BoxGeometry(10, 2, 2);
+    
+    // Create 4 wings
+    for (let i = 0; i < 4; i++) {
+        const wing = new THREE.Mesh(wingGeometry, new THREE.MeshPhongMaterial({ color: wingColor }));
+        const wingAngle = i * Math.PI / 2;
+        wing.rotation.y = wingAngle;
+        wing.position.x = Math.cos(wingAngle) * 7;
+        wing.position.z = Math.sin(wingAngle) * 7;
+        wing.position.y = 1;
+        healthcareGroup.add(wing);
+    }
+    
+    // Add the entire group to the scene
+    scene.add(healthcareGroup);
 }
 
 // Function to handle window resizing
